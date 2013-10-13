@@ -1,10 +1,16 @@
 function WPATH(s) {
     var index = s.lastIndexOf("/");
     var path = -1 === index ? "FlexGrid/" + s : s.substring(0, index) + "/FlexGrid/" + s.substring(index + 1);
-    return path;
+    return true && 0 !== path.indexOf("/") ? "/" + path : path;
 }
 
 function Controller() {
+    function Fragment(fragSpec) {
+        _.extend(this, fragSpec);
+        this.view = this.view || Ti.UI.createView();
+        this.props && this.view.applyProperties(this.props);
+        this.pos && this.span && this.draw();
+    }
     new (require("alloy/widget"))("FlexGrid");
     this.__widgetId = "FlexGrid";
     require("alloy/controllers/BaseController").apply(this, Array.prototype.slice.call(arguments));
@@ -24,6 +30,12 @@ function Controller() {
     _.extend($, $.__views);
     var args = arguments[0] || {};
     var TiGrid = require(WPATH("TiGrid"));
+    $.widget.format = {};
+    $.widget.format.ALL = 0;
+    $.widget.format.HAND_PORT = 1;
+    $.widget.format.HAND_LAND = 2;
+    $.widget.format.TABLET_PORT = 3;
+    $.widget.format.TABLET_LAND = 4;
     var grid = new TiGrid({
         height: args.height || Ti.Platform.displayCaps.platformHeight,
         width: args.width || Ti.Platform.displayCaps.platformWidth,
@@ -31,20 +43,38 @@ function Controller() {
         rows: args.rows || 3,
         margin: args.margin || 0
     });
-    $.addView = function(view, coord, span) {
-        coord = coord || [ 0, 0 ];
-        span = span || [ 1, 1 ];
-        $.widget.add(view);
-        grid.coord(coord[0], coord[1], {
-            rowspan: span[0],
-            colspan: span[1]
-        }).position(view);
+    $.getDimension = function() {
+        return [ this.rows, this.cols ];
     };
-    $.getRows = function() {
-        return this.rows;
+    $.createFragment = function(fragSpec) {
+        fragSpec = fragSpec || {};
+        var frag = new Fragment(fragSpec);
+        $.widget.add(frag.view);
+        return frag;
     };
-    $.getCols = function() {
-        return this.cols;
+    Fragment.prototype.getView = function() {
+        return this.view;
+    };
+    Fragment.prototype.place = function(pos, span) {
+        this.pos = pos || [ 0, 0 ];
+        this.span = span || [ 1, 1 ];
+        this.draw();
+        return this;
+    };
+    Fragment.prototype.draw = function() {
+        grid.coord(this.pos[0], this.pos[1], {
+            rowspan: this.span[0],
+            colspan: this.span[1]
+        }).position(this.view);
+        return this;
+    };
+    $.createLayout = function() {
+        var v = view || Ti.UI.createView();
+        var frag = new Fragment({
+            view: v
+        });
+        $.widget.add(frag.view);
+        return frag;
     };
     _.extend($, exports);
 }

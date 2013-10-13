@@ -21,26 +21,53 @@ function Controller() {
     $.__views.flexgrid.setParent($.__views.index);
     exports.destroy = function() {};
     _.extend($, $.__views);
-    var view1 = Ti.UI.createView({
-        backgroundColor: "red"
+    var frag;
+    var fragments = {};
+    var view1 = Ti.UI.createView();
+    frag = $.flexgrid.createFragment({
+        name: "view1",
+        pos: [ 0, 0 ],
+        span: [ 1, 1 ],
+        props: {
+            backgroundColor: "red"
+        },
+        view: view1
     });
-    var view2 = Ti.UI.createView({
-        backgroundColor: "blue"
+    fragments[frag.name] = frag;
+    frag = $.flexgrid.createFragment({
+        name: "view2",
+        pos: [ 1, 1 ],
+        span: [ 1, 2 ],
+        props: {
+            backgroundColor: "blue"
+        }
     });
-    var view3 = Ti.UI.createView({
-        backgroundColor: "green"
+    fragments[frag.name] = frag;
+    frag = $.flexgrid.createFragment({
+        name: "view3",
+        props: {
+            backgroundColor: "green"
+        }
     });
-    var view4 = Ti.UI.createView({
-        backgroundColor: "silver"
-    });
-    var view5 = Ti.UI.createView({
-        backgroundColor: "olive"
-    });
-    $.flexgrid.addView(view1, [ 0, 0 ], [ 1, 1 ]);
-    $.flexgrid.addView(view2, [ 1, 1 ], [ 1, 2 ]);
-    $.flexgrid.addView(view3, [ 2, 0 ], [ 1, 1 ]);
-    $.flexgrid.addView(view4, [ 1, 0 ], [ 1, 1 ]);
-    $.flexgrid.addView(view5, [ 0, 2 ], [ 2, 4 ]);
+    fragments[frag.name] = frag;
+    frag.place([ 2, 0 ], [ 1, 1 ]);
+    var layout = [ {
+        name: "view4",
+        pos: [ 1, 0 ],
+        span: [ 1, 1 ],
+        props: {
+            backgroundColor: "silver"
+        }
+    }, {
+        name: "view5",
+        pos: [ 0, 2 ],
+        span: [ 2, 4 ]
+    } ];
+    for (var i = 0, l = layout.length; l > i; i++) {
+        frag = $.flexgrid.createFragment(layout[i]);
+        fragments[frag.name] = frag;
+    }
+    fragments["view5"].getView().backgroundColor = "olive";
     $.index.open();
     _.extend($, exports);
 }
