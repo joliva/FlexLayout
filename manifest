@@ -1,9 +1,9 @@
-#appname:FlexGridWidget
-#appid:com.olivalabs.flexgrid
+#appname:FlexLayoutWidget
+#appid:com.olivalabs.flexlayout
 #type:mobile
 #guid:f5c156d7-5baf-450c-9b67-6c9e185cef22
 #version:1.0
 #publisher:John Oliva
 #url:http://olivalabs.com
 #image:appicon.png
-#desc:Flexible grid widget
+#desc:Flexible layout widget

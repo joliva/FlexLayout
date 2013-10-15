@@ -8,6 +8,6 @@
     "os:ios": {},
     "os:mobileweb": {},
     "dependencies": {
-        "FlexGrid": "1.0"
+        "FlexLayout": "1.0"
     }
 }

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ti:app xmlns:ti="http://ti.appcelerator.org">
-    <id>com.olivalabs.flexgrid</id>
-    <name>FlexGridWidget</name>
+    <id>com.olivalabs.flexlayout</id>
+    <name>FlexLayoutWidget</name>
     <version>1.0</version>
     <publisher>John Oliva</publisher>
     <url>http://olivalabs.com</url>
-    <description>Flexible grid widget</description>
+    <description>Flexible layout widget</description>
     <copyright>2013 by John Oliva</copyright>
     <icon>appicon.png</icon>
     <persistent-wifi>false</persistent-wifi>
@@ -29,11 +29,11 @@
         </orientations>
     </iphone>
     <android xmlns:android="http://schemas.android.com/apk/res/android">
-		<tool-api-level>18</tool-api-level>
+        <tool-api-level>18</tool-api-level>
         <manifest>
-			<application android:theme="@android:style/Theme.Holo"/>
-	        <uses-sdk android:minSdkVersion="14"/>
-	        <uses-sdk android:targetSdkVersion="15"/>
+            <application android:theme="@android:style/Theme.Holo"/>
+            <uses-sdk android:minSdkVersion="14"/>
+            <uses-sdk android:targetSdkVersion="15"/>
             <supports-screens android:anyDensity="false"/>
         </manifest>
     </android>
