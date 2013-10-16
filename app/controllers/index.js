@@ -60,6 +60,8 @@ layout.getFragment('view5').getView().add(web);
 
 layout.compose();
 
+Ti.API.debug('------------------');
+
 layout.setFragSpec({
 	name: 'view2',
 //	pos: [0,0],
@@ -70,5 +72,7 @@ layout.setFragSpec({
 });
 
 layout.compose();
+
+Ti.API.debug(layout);
 
 $.index.open();

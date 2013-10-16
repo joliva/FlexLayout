@@ -104,11 +104,13 @@ function Layout(name) {
 	this.staticFragSpecs.formFactor = {};
 	this.staticFragSpecs.formFactor.handheld = {};
 	this.staticFragSpecs.formFactor.tablet = {};
+	this.staticFragSpecs.formFactor.selector = (Alloy.isHandheld) ? 'handheld' : 'tablet';
 	
 	this.dynamicFragSpecs = {};
 	this.dynamicFragSpecs.orientation = {};
 	this.dynamicFragSpecs.orientation.portrait = {};	
 	this.dynamicFragSpecs.orientation.landscape = {};
+	this.dynamicFragSpecs.orientation.selector = (Ti.Gesture.isPortrait()) ? 'portrait' : 'landscape';
 	
 	this.fragments = {};
 }
@@ -196,10 +198,11 @@ Layout.prototype.compose = function() {
 		// go through each aspect of the static fragment spec aspects to determine which
 		// have changed and should be applied during the update
 		for (var aspect in this.staticFragSpecs) {
-			Ti.API.debug('aspect: ' + aspect);
-			
 			for (var aspectVal in this.staticFragSpecs[aspect]) {
-				Ti.API.debug('aspectVal: ' + aspectVal);
+				if (this.staticFragSpecs[aspect].dirty === true) {
+					Ti.API.debug('aspect: ' + aspect);
+					Ti.API.debug('aspectVal: ' + aspectVal);
+				}
 			}
 		}
 		
