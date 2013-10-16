@@ -190,11 +190,18 @@ Layout.prototype.compose = function() {
 	// work through default, static, and dynamic layers to determine the minimal set of changes
 	// necessary to apply to the Titanium proxies to draw the layout
 	
-	// for now simply copy defaults over to current
-	this.currentFragSpecs = this.defaultFragSpecs;
-
 	for (var name in this.defaultFragSpecs) {
 		var fragSpec = this.defaultFragSpecs[name];
+		
+		// go through each aspect of the static fragment spec aspects to determine which
+		// have changed and should be applied during the update
+		for (var aspect in this.staticFragSpecs) {
+			Ti.API.debug('aspect: ' + aspect);
+			
+			for (var aspectVal in this.staticFragSpecs[aspect]) {
+				Ti.API.debug('aspectVal: ' + aspectVal);
+			}
+		}
 		
 		if (fragSpec.dirty == true) {
 			var frag;
@@ -212,6 +219,9 @@ Layout.prototype.compose = function() {
 			frag.draw();
 		}
 	}
+	
+	// for now simply copy defaults over to current
+	this.currentFragSpecs = this.defaultFragSpecs;
 }
 
 Layout.prototype.getFragment = function(name) {
