@@ -73,7 +73,7 @@ layout.compose();
 
 layout.setFragSpec({
 	name: 'view2',
-	pos: [0,1],
+	pos: [0,0],
 	span: [1,1],
 	props: {
 		backgroundColor: 'olive'

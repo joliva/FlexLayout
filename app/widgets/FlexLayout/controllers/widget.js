@@ -144,6 +144,7 @@ Layout.prototype.setFragSpec = function(fragSpec, layer, aspect, aspectValue) {
 	switch (layer) {
 	case Layout.prototype.DefaultLayer:
 		this.defaultFragSpecs[fragSpec.name] = fragSpec;
+		this.currentFragSpecs[fragSpec.name] = {};
 		break;
 	case Layout.prototype.StaticLayer:
 		var aspect = aspect || 'formFactor';	// default static layer aspect
@@ -152,6 +153,7 @@ Layout.prototype.setFragSpec = function(fragSpec, layer, aspect, aspectValue) {
 		
 		if (this.validAspect(aspect, aspectValue, layer)) {
 			this.staticFragSpecs[aspect][aspectValue][fragSpec.name] = fragSpec;
+			this.currentFragSpecs[fragSpec.name] = {};
 		} else {
 			throw 'setFragSpec: invalid aspect for layer: ' + layer + '/' + aspect;
 		}
@@ -163,6 +165,7 @@ Layout.prototype.setFragSpec = function(fragSpec, layer, aspect, aspectValue) {
 		
 		if (this.validAspect(aspect, aspectValue, layer)) {
 			this.dynamicFragSpecs[aspect][aspectValue][fragSpec.name] = fragSpec;
+			this.currentFragSpecs[fragSpec.name] = {};
 		} else {
 			throw 'setFragSpec: invalid aspect for layer: ' + layer + '/' + aspect;
 		}
@@ -187,7 +190,6 @@ Layout.prototype.getFragSpec = function(name, layer, aspect) {
 	}
 }
 
-// NOTE: this renders directly from the default layer for now
 Layout.prototype.compose = function() {
 	// work through default, static, and dynamic layers to determine the minimal set of changes
 	// necessary to apply to the Titanium proxies to draw the layout
@@ -232,6 +234,8 @@ Layout.prototype.compose = function() {
 		if (dirty == true) {
 			var frag;
 			
+			fragSpec.dirty = false;
+			
 			// create fragment if first time, otherwise update
 			if (this.fragments.hasOwnProperty(name) === false) {
 				// create
@@ -242,11 +246,11 @@ Layout.prototype.compose = function() {
 				frag.update(fragSpec);
 			}
 			frag.draw();
+			
+			// update current fragment spec from new one
+			_.extend(this.currentFragSpecs[name], fragSpec);
 		}
-	}	
-	
-	// for now simply copy defaults over to current
-	this.currentFragSpecs = this.defaultFragSpecs;
+	}
 }
 
 Layout.prototype.getFragment = function(name) {
