@@ -193,20 +193,43 @@ Layout.prototype.compose = function() {
 	// necessary to apply to the Titanium proxies to draw the layout
 	
 	for (var name in this.defaultFragSpecs) {
-		var fragSpec = this.defaultFragSpecs[name];
+		var fragSpec = {};
+		var dirty = this.defaultFragSpecs[name].dirty
+		
+		if (this.defaultFragSpecs[name].dirty === true) {
+			_.extend(fragSpec, this.defaultFragSpecs[name]);
+			this.defaultFragSpecs[name].dirty = false;
+		}
 		
 		// go through each aspect of the static fragment spec aspects to determine which
 		// have changed and should be applied during the update
 		for (var aspect in this.staticFragSpecs) {
-			for (var aspectVal in this.staticFragSpecs[aspect]) {
-				if (this.staticFragSpecs[aspect].dirty === true) {
-					Ti.API.debug('aspect: ' + aspect);
-					Ti.API.debug('aspectVal: ' + aspectVal);
-				}
+			var selector = this.staticFragSpecs[aspect].selector;
+			
+			if (this.staticFragSpecs[aspect][selector].hasOwnProperty(name)) {
+				if (this.staticFragSpecs[aspect][selector][name].dirty === true) {
+					dirty = true;
+					_.extend(fragSpec, this.staticFragSpecs[aspect][selector][name]);
+					this.staticFragSpecs[aspect][selector][name].dirty = false;
+				}				
 			}
 		}
 		
-		if (fragSpec.dirty == true) {
+		// go through each aspect of the dynamic fragment spec aspects to determine which
+		// have changed and should be applied during the update
+		for (var aspect in this.dynamicFragSpecs) {
+			var selector = this.dynamicFragSpecs[aspect].selector;
+			
+			if (this.dynamicFragSpecs[aspect][selector].hasOwnProperty(name)) {
+				if (this.dynamicFragSpecs[aspect][selector][name].dirty === true) {
+					dirty = true;
+					_.extend(fragSpec, this.dynamicFragSpecs[aspect][selector][name]);
+					this.dynamicFragSpecs[aspect][selector][name].dirty = false;
+				}				
+			}
+		}
+		
+		if (dirty == true) {
 			var frag;
 			
 			// create fragment if first time, otherwise update
@@ -218,10 +241,9 @@ Layout.prototype.compose = function() {
 				frag = this.fragments[name];
 				frag.update(fragSpec);
 			}
-			fragSpec.dirty = false;		// clear dirty flag
 			frag.draw();
 		}
-	}
+	}	
 	
 	// for now simply copy defaults over to current
 	this.currentFragSpecs = this.defaultFragSpecs;

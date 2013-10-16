@@ -60,19 +60,26 @@ layout.getFragment('view5').getView().add(web);
 
 layout.compose();
 
-Ti.API.debug('------------------');
-
 layout.setFragSpec({
 	name: 'view2',
-//	pos: [0,0],
-	span: [2,1],
+	pos: [0,0],
+	span: [1,1],
 	props: {
 		backgroundColor: 'yellow'
 	}
-});
+}, layout.StaticLayer, 'formFactor', 'handheld');
 
 layout.compose();
 
-Ti.API.debug(layout);
+layout.setFragSpec({
+	name: 'view2',
+	pos: [0,1],
+	span: [1,1],
+	props: {
+		backgroundColor: 'olive'
+	}
+}, layout.DynamicLayer, 'orientation', 'portrait');
+
+layout.compose();
 
 $.index.open();
