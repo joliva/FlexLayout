@@ -64,6 +64,17 @@ function Fragment(fragSpec) {
 	}
 }
 
+Fragment.prototype.update = function(fragSpec) {
+	fragSpec = fragSpec || {};
+
+	_.extend(this, fragSpec);
+	if (this.props) {
+		this.view.applyProperties(this.props);
+	}
+
+	return this;	// returns fragment
+}
+
 Fragment.prototype.getView = function() {
 	return this.view;
 };
@@ -186,7 +197,17 @@ Layout.prototype.compose = function() {
 		var fragSpec = this.defaultFragSpecs[name];
 		
 		if (fragSpec.dirty == true) {
-			var frag = this.fragments[name] = $.createFragment(fragSpec);
+			var frag;
+			
+			// create fragment if first time, otherwise update
+			if (this.fragments.hasOwnProperty(name) === false) {
+				// create
+				frag = this.fragments[name] = $.createFragment(fragSpec);
+			} else {
+				// update
+				frag = this.fragments[name];
+				frag.update(fragSpec);
+			}
 			fragSpec.dirty = false;		// clear dirty flag
 			frag.draw();
 		}

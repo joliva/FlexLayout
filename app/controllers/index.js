@@ -60,4 +60,15 @@ layout.getFragment('view5').getView().add(web);
 
 layout.compose();
 
+layout.setFragSpec({
+	name: 'view2',
+//	pos: [0,0],
+	span: [2,1],
+	props: {
+		backgroundColor: 'yellow'
+	}
+});
+
+layout.compose();
+
 $.index.open();
