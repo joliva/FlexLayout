@@ -6,7 +6,7 @@ var layout = $.flexlayout.createLayout();
 // create fragment specifying everything
 var view1 = Ti.UI.createView();
 
-layout.addFragSpec({
+layout.setFragSpec({
 	name: 'view1',
 	pos: [1,1],
 	span: [1,3],
@@ -17,14 +17,14 @@ layout.addFragSpec({
 });
 
 // create fragment with auto creation of view
-layout.addFragSpec({
+layout.setFragSpec({
 	name: 'view2',
 	pos: [0,0],
 	span: [1,1],
 	props: {
 		backgroundColor: 'red'
 	}
-}, layout.DefaultLayer);
+});
 
 // data driven fragment creation
 var specs = [
@@ -33,8 +33,18 @@ var specs = [
 	{name: 'view5', pos: [0,2], span: [2,4]},
 ];
 for (var i=0, l=specs.length; i<l; i++) {
-	layout.addFragSpec(specs[i]);
+	layout.setFragSpec(specs[i]);
 }
+
+// create fragment associated with dynamic layer, aspect = orientation
+layout.setFragSpec({
+	name: 'view6',
+	pos: [0,0],
+	span: [1,1],
+	props: {
+		backgroundColor: 'black'
+	}
+}, layout.DynamicLayer, 'orientation', 'portrait');
 
 layout.compose();
 
@@ -47,5 +57,7 @@ var web = Ti.UI.createWebView({
 });
 
 layout.getFragment('view5').getView().add(web);
+
+layout.compose();
 
 $.index.open();

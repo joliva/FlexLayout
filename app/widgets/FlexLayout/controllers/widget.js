@@ -24,6 +24,7 @@ var TiGrid = require(WPATH('TiGrid'));
  * span: extent of fragment [rows, cols]
  * view: view to render in fragment (if not provided automatically created)
  * props: properties to apply to view in JSON format
+ * dirty: flag indicating if spec has changed since flag last cleared
  */
 
 // Make a new grid with the dimensions we want
@@ -102,28 +103,74 @@ function Layout(name) {
 }
 
 //some Layout constants
-Layout.prototype.DefaultLayer = 1;		// default fragment specs
-Layout.prototype.StaticLayer = 2;		// static fragment specs
-Layout.prototype.DynamicLayer = 3;		// dynamic fragment specs
+Layout.prototype.DefaultLayer = 'defaultFragSpecs';		// default fragment specs
+Layout.prototype.StaticLayer = 'staticFragSpecs';		// static fragment specs
+Layout.prototype.DynamicLayer = 'dynamicFragSpecs';		// dynamic fragment specs
 
-Layout.prototype.addFragSpec = function(fragSpec, layer) {
-	if (!fragSpec) throw 'addFragSpec: invalid value for fragSpec';
+Layout.prototype.validAspect = function(aspect, aspectValue, layer) {
+	if (layer !== Layout.prototype.DefaultLayer) {
+		if (this[layer].hasOwnProperty(aspect)) {
+			return this[layer][aspect].hasOwnProperty(aspectValue) ? true : false;
+		} else {
+			return false;
+		}
+		return	this[layer].hasOwnProperty(aspect) ? true : false;
+	} else {
+		throw 'validAspect: DefaultLayer does not have aspects';
+	}
 	
+}
+
+Layout.prototype.setFragSpec = function(fragSpec, layer, aspect, aspectValue) {
+	if (!fragSpec) throw 'setFragSpec: invalid value for fragSpec';
+		
 	var layer = layer || Layout.prototype.DefaultLayer;
+	
+	fragSpec.dirty = true;
 	
 	switch (layer) {
 	case Layout.prototype.DefaultLayer:
 		this.defaultFragSpecs[fragSpec.name] = fragSpec;
 		break;
-	case Layout.prototype.DynamicLayer:
-		this.staticFragSpecs[fragSpec.name] = fragSpec;
-		break;
 	case Layout.prototype.StaticLayer:
-		this.dynamicFragSpecs[fragSpec.name] = fragSpec;
+		var aspect = aspect || 'formFactor';	// default static layer aspect
+		
+		if (!aspectValue) throw 'setFragSpec: invalid value for aspectValue: ' + layer + '/' + aspect + '/' + aspectValue;
+		
+		if (this.validAspect(aspect, aspectValue, layer)) {
+			this.staticFragSpecs[aspect][aspectValue][fragSpec.name] = fragSpec;
+		} else {
+			throw 'setFragSpec: invalid aspect for layer: ' + layer + '/' + aspect;
+		}
+		break;
+	case Layout.prototype.DynamicLayer:
+		var aspect = aspect || 'orientation';	// default dynamic layer aspect
+		
+		if (!aspectValue) throw 'setFragSpec: invalid value for aspectValue: ' + layer + '/' + aspect + '/' + aspectValue;
+		
+		if (this.validAspect(aspect, aspectValue, layer)) {
+			this.dynamicFragSpecs[aspect][aspectValue][fragSpec.name] = fragSpec;
+		} else {
+			throw 'setFragSpec: invalid aspect for layer: ' + layer + '/' + aspect;
+		}
 		break;
 	default:
 		throw 'addFragSpec: invalid value for layer';
 		break;
+	}
+}
+
+Layout.prototype.getFragSpec = function(name, layer, aspect) {	
+	var layer = layer || Layout.prototype.DefaultLayer;
+	
+	if (validLayer(layer)) {
+		if (this[layer].hasOwnProperty(name)) {
+			return this[layer][name];
+		} else {
+			throw 'getFragSpec: invalid fragment spec name: ' + name;
+		}
+	} else {
+		throw 'getFragSpec: invalid value for layer';
 	}
 }
 
@@ -136,8 +183,13 @@ Layout.prototype.compose = function() {
 	this.currentFragSpecs = this.defaultFragSpecs;
 
 	for (var name in this.defaultFragSpecs) {
-		var frag = this.fragments[name] = $.createFragment(this.defaultFragSpecs[name]);
-		frag.draw();
+		var fragSpec = this.defaultFragSpecs[name];
+		
+		if (fragSpec.dirty == true) {
+			var frag = this.fragments[name] = $.createFragment(fragSpec);
+			fragSpec.dirty = false;		// clear dirty flag
+			frag.draw();
+		}
 	}
 }
 
