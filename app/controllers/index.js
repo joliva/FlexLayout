@@ -3,69 +3,95 @@ var frag;
 // create layer
 var layout = $.flexlayout.createLayout();
 
+
 // create fragment specifying everything
 var view1 = Ti.UI.createView();
-
 layout.setFragSpec({
 	name: 'view1',
-	pos: [1,1],
-	span: [2,6],
 	props: {
 		layout: 'vertical',
 		backgroundColor: 'blue'
 	},
 	view: view1
 });
+layout.setFragSpec({
+	name: 'view1',
+	pos: [1,1],
+	span: [2,6],
+}, layout.DynamicLayer, 'orientation', 'portrait');
+layout.setFragSpec({
+	name: 'view1',
+	pos: [4,0],
+	span: [3,4],
+}, layout.DynamicLayer, 'orientation', 'landscape');
+
 
 // create fragment with auto creation of view
 layout.setFragSpec({
 	name: 'view2',
-	pos: [5,5],
-	span: [3,3],
 	props: {
 		backgroundColor: 'red'
 	}
 });
-
-// data driven fragment creation
-var specs = [
-    {name: 'view3', pos: [2,0], span: [1,1], props: {backgroundColor: 'green'}},
-	{name: 'view4', pos: [1,0], span: [1,1], props: {backgroundColor: 'silver'}}
-];
-for (var i=0, l=specs.length; i<l; i++) {
-	layout.setFragSpec(specs[i]);
-}
-
-//create fragment associated with dynamic layer, aspect = orientation
-/*
 layout.setFragSpec({
-	name: 'view5',
-	pos: [0,3],
-	span: [5,8],
-});
-*/
-layout.setFragSpec({
-	name: 'view5',
-	pos: [0,3],
-	span: [5,8],
+	name: 'view2',
+	pos: [4,0],
+	span: [1,2]
 }, layout.DynamicLayer, 'orientation', 'portrait');
 layout.setFragSpec({
-	name: 'view5',
-	pos: [0,0],
-	span: [8,4],
+	name: 'view2',
+	pos: [4,7],
+	span: [1,2]
 }, layout.DynamicLayer, 'orientation', 'landscape');
 
-// create fragment associated with dynamic layer, aspect = orientation
+
+// data driven fragment specification for 3 dynamic fragments
+var specs = [
+	{spec:{
+		name: 'view3', pos: [2,0], span: [1,1], props: {backgroundColor: 'green'}
+	}, layer:'DynamicLayer', aspect:'orientation', aspectValue:'portrait'},
+	{spec:{
+		name: 'view3', pos: [5,6], span: [1,1], props: {backgroundColor: 'green'}
+	}, layer:'DynamicLayer', aspect:'orientation', aspectValue:'landscape'},
+	
+	{spec:{
+		name: 'view4', pos: [1,0], span: [1,1], props: {backgroundColor: 'silver'}
+	}, layer:'DynamicLayer', aspect:'orientation', aspectValue:'portrait'},
+	{spec:{
+		name: 'view4', pos: [6,5], span: [1,1], props: {backgroundColor: 'silver'}
+	}, layer:'DynamicLayer', aspect:'orientation', aspectValue:'landscape'},
+	
+	{spec:{
+		name: 'view5', pos: [0,3], span: [5,8]
+	}, layer:'DynamicLayer', aspect:'orientation', aspectValue:'portrait'},
+	{spec:{
+		name: 'view5', pos: [0,0], span: [8,4]
+	}, layer:'DynamicLayer', aspect:'orientation', aspectValue:'landscape'}
+];
+for (var i=0, l=specs.length; i<l; i++) {
+	var s = specs[i];
+	layout.setFragSpec(s.spec, layout[s.layer], s.aspect, s.aspectValue);
+}
+
+
+// create fragment only visible in portrait mode
 layout.setFragSpec({
 	name: 'view6',
 	pos: [0,0],
-	span: [1,1],
-	props: {
-		backgroundColor: 'black'
-	}
+	span: [1,1]
+});
+layout.setFragSpec({
+	name: 'view6',
+	props: {visible: true, backgroundColor: 'black'}
 }, layout.DynamicLayer, 'orientation', 'portrait');
+layout.setFragSpec({
+	name: 'view6',
+	props: {visible: false}
+}, layout.DynamicLayer, 'orientation', 'landscape');
 
-layout.compose();
+
+layout.compose();	// fragments that don't already exist are created in compose()
+
 
 // accessing view from last created fragment to add web view
 var web = Ti.UI.createWebView({
@@ -76,42 +102,20 @@ var web = Ti.UI.createWebView({
 });
 layout.getFragment('view5').getView().add(web);
 
+// accessing earlier view to add some buttons
 var v1 = layout.getFragment('view1').getView();
 v1.add(Ti.UI.createButton({
-	top: '20dp',
+	top: '13%',
 	width: '50%',
-	height: Ti.UI.SIZE,
+	height: '30%',
 	title: 'Button 1'
 }));
-
 v1.add(Ti.UI.createButton({
-	top: '20dp',
+	top: '13%',
 	width: '50%',
-	height: Ti.UI.SIZE,
+	height: '30%',
 	title: 'Button 2'
 }));
-
-layout.compose();
-
-layout.setFragSpec({
-	name: 'view2',
-	pos: [0,0],
-	span: [1,1],
-	props: {
-		backgroundColor: 'yellow'
-	}
-}, layout.StaticLayer, 'formFactor', 'handheld');
-
-layout.compose();
-
-layout.setFragSpec({
-	name: 'view2',
-	pos: [0,0],
-	span: [1,1],
-	props: {
-		backgroundColor: 'olive'
-	}
-}, layout.DynamicLayer, 'orientation', 'portrait');
 
 layout.compose();
 
