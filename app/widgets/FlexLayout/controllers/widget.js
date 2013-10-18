@@ -95,24 +95,59 @@ Fragment.prototype.draw = function() {
 }
 
 function Layout(name) {
-	this.name = name;
+	var self = this;
 	
-	this.defaultFragSpecs = {};
-	this.currentFragSpecs = {};
+	self.name = name;
 	
-	this.staticFragSpecs = {};
-	this.staticFragSpecs.formFactor = {};
-	this.staticFragSpecs.formFactor.handheld = {};
-	this.staticFragSpecs.formFactor.tablet = {};
-	this.staticFragSpecs.formFactor.selector = (Alloy.isHandheld) ? 'handheld' : 'tablet';
+	self.defaultFragSpecs = {};
+	self.currentFragSpecs = {};
 	
-	this.dynamicFragSpecs = {};
-	this.dynamicFragSpecs.orientation = {};
-	this.dynamicFragSpecs.orientation.portrait = {};	
-	this.dynamicFragSpecs.orientation.landscape = {};
-	this.dynamicFragSpecs.orientation.selector = (Ti.Gesture.isPortrait()) ? 'portrait' : 'landscape';
+	self.staticFragSpecs = {};
+	self.staticFragSpecs.formFactor = {};
+	self.staticFragSpecs.formFactor.handheld = {};
+	self.staticFragSpecs.formFactor.tablet = {};
+	self.staticFragSpecs.formFactor.selector = (Alloy.isHandheld) ? 'handheld' : 'tablet';
 	
-	this.fragments = {};
+	self.dynamicFragSpecs = {};
+	self.dynamicFragSpecs.orientation = {};
+	self.dynamicFragSpecs.orientation.portrait = {};	
+	self.dynamicFragSpecs.orientation.landscape = {};
+	self.dynamicFragSpecs.orientation.selector = (Ti.Gesture.isPortrait()) ? 'portrait' : 'landscape';
+	
+	self.fragments = {};
+	
+	// dynamic updating
+	Ti.Gesture.addEventListener('orientationchange', function(e) {
+		var selector = (Ti.Gesture.isPortrait()) ? 'portrait' : 'landscape';
+		self.dynamicFragSpecs.orientation.selector = selector;
+		Ti.API.debug(selector);
+		
+		// reconfigure TiGrid so that grid is computed based on the new orientation
+		
+		Ti.API.debug('reconfiguring grid...');
+		grid.reconfigure({
+			height: args.height || Ti.Platform.displayCaps.platformHeight,
+			width: args.width || Ti.Platform.displayCaps.platformWidth
+		});
+		
+		Ti.API.debug('grid: ' + JSON.stringify(grid));
+			
+		
+		// cycle over the dynamic fragment specs for the new orientation and set dirty
+		// so they are redrawn based on the new specs
+		for (var key in self.dynamicFragSpecs.orientation[selector]) {
+			Ti.API.debug('setting dirty: ' + key);
+			self.dynamicFragSpecs.orientation[selector][key].dirty = true;
+		}
+		
+		// cycle through fragments and redraw them using the new grid
+		Ti.API.debug('redraw fragments based on new grid...');
+		for (key in self.fragments) {
+			self.fragments[key].draw();
+		}
+
+		self.compose();
+	});
 }
 
 //some Layout constants
@@ -191,6 +226,8 @@ Layout.prototype.getFragSpec = function(name, layer, aspect) {
 }
 
 Layout.prototype.compose = function() {
+	Ti.API.debug('composing...');
+	
 	// work through default, static, and dynamic layers to determine the minimal set of changes
 	// necessary to apply to the Titanium proxies to draw the layout
 	
@@ -232,6 +269,8 @@ Layout.prototype.compose = function() {
 		}
 		
 		if (dirty == true) {
+			Ti.API.debug(fragSpec);
+			
 			var frag;
 			
 			fragSpec.dirty = false;
@@ -260,3 +299,4 @@ Layout.prototype.getFragment = function(name) {
 		throw 'getFragment: invalid value for name';
 	}
 }
+
