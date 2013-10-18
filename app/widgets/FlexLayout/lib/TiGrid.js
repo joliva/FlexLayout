@@ -53,6 +53,32 @@ function TiGrid(/*Object*/ _args) {
 }
 
 /**
+ * Reconfigure TiGrid parameters
+ * 
+ * @argument _args Object 
+ *  cols: Number of grid columns, 
+ *  rows: Number of grid rows, 
+ *  width: Width of the grid
+ *  height: Height of the grid
+ *  margin: Amount of space to leave on all sides
+ * }
+ */
+TiGrid.prototype.reconfigure = function(/*Object*/ _args) {
+	_args = _args || {};
+	
+	this.cols = _args.cols || this.cols;
+	this.rows = _args.rows || this.rows;
+	this.width = _args.width || this.width;
+	this.height = _args.height || this.height;
+	this.margin = _args.margin || this.margin;
+	
+	// Rows, cols, height and width are all required
+	if (this.cols < 1 || this.rows < 1 || this.width < 1 || this.height < 1) {
+		throw new Error('TiGrid.reconfigure: incorrect parameters: cols, rows, width and height should be defined and greater than zero');
+	}	
+}
+
+/**
  * Get the position and size of elements using grid coordinates
  * 
  * @argument x Int	Horizontal cell location starting at 0
