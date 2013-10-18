@@ -1,5 +1,5 @@
 <Alloy>
 	<Window class="container">
-		<Widget src='FlexLayout' id='flexlayout' rows=4 cols=4>
+		<Widget src='FlexLayout' id='flexlayout' rows=8 cols=8>
 	</Window>
 </Alloy>
