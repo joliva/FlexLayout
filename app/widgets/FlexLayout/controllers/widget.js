@@ -1,6 +1,8 @@
 var args = arguments[0] || {};
 
 var TiGrid = require(WPATH('TiGrid'));
+var Logger = require(WPATH('common/TimeLogger'));	// logging support
+var logger = new Logger('FlexLayout');
 
 /* Layout (JSON format)
  * 
@@ -231,13 +233,27 @@ Layout.prototype.compose = function() {
 	// work through default, static, and dynamic layers to determine the minimal set of changes
 	// necessary to apply to the Titanium proxies to draw the layout
 	
-	for (var name in this.defaultFragSpecs) {
+	// Cycle over all layers to create a list of all fragment spec names.
+	// It is necessary to do this to allow fragment specs in the static and dynamic layers 
+	// that do not exist in the default layer.
+
+	var fragSpecNames = {};
+	for (var name in this.defaultFragSpecs) fragSpecNames[name] = 1;
+	for (var name in this.staticFragSpecs.formFactor.handheld) fragSpecNames[name] = 1;
+	for (var name in this.staticFragSpecs.formFactor.tablet) fragSpecNames[name] = 1;
+	for (var name in this.dynamicFragSpecs.orientation.portrait) fragSpecNames[name] = 1;
+	for (var name in this.dynamicFragSpecs.orientation.landscape) fragSpecNames[name] = 1;
+	
+	for (var name in fragSpecNames) {
 		var fragSpec = {};
-		var dirty = this.defaultFragSpecs[name].dirty
-		
-		if (this.defaultFragSpecs[name].dirty === true) {
-			_.extend(fragSpec, this.defaultFragSpecs[name]);
-			this.defaultFragSpecs[name].dirty = false;
+		var dirty = false;
+
+		if (this.defaultFragSpecs.hasOwnProperty(name)) {
+			if (this.defaultFragSpecs[name].dirty === true) {
+				dirty = true
+				_.extend(fragSpec, this.defaultFragSpecs[name]);
+				this.defaultFragSpecs[name].dirty = false;
+			}
 		}
 		
 		// go through each aspect of the static fragment spec aspects to determine which
@@ -296,7 +312,7 @@ Layout.prototype.getFragment = function(name) {
 	if (this.fragments.hasOwnProperty(name)) {
 		return this.fragments[name];
 	} else {
-		throw 'getFragment: invalid value for name';
+		logger.error('getFragment: invalid value for name');
 	}
 }
 
