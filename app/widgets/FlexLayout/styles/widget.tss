@@ -1,4 +1,5 @@
 ".container": {
+	backgroundColor: 'white',
 	height: Ti.UI.FILL,
 	width: Ti.UI.FILL
 }
