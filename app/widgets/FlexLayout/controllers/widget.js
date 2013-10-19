@@ -29,30 +29,34 @@ var logger = new Logger('FlexLayout');
  * dirty: flag indicating if spec has changed since flag last cleared
  */
 
-// Make a new grid with the dimensions we want
-var grid = new TiGrid({
-    height: args.height || Ti.Platform.displayCaps.platformHeight,
-    width: args.width || Ti.Platform.displayCaps.platformWidth,
-    cols: args.cols || 3,
-    rows: args.rows || 3,
-    margin: args.margin || 0
-});
+var grid;
 
-$.getDimension = function() {
-	return [this.rows, this.cols];
+function getWidgetSize() {
+	return {height:$.widget.size.height, width:$.widget.size.width};
 }
 
 $.createFragment = function(fragSpec) {
 	fragSpec = fragSpec || {};
-
+	
 	var frag = new Fragment(fragSpec);
 	
 	$.widget.add(frag.view);
 	return frag;
 }
 
-$.createLayout = function(name) {
+$.createLayout = function(name) {	
 	if (!name) name = 'main';
+	
+	var widgetSize = getWidgetSize();
+	
+	// Make a new grid with the dimensions we want
+	grid = new TiGrid({
+	    height: args.height || widgetSize.height,
+	    width: args.width || widgetSize.width,
+	    cols: args.cols || 3,
+	    rows: args.rows || 3,
+	    margin: args.margin || 0
+	});
 	
 	return new Layout(name);
 }
@@ -115,30 +119,25 @@ function Layout(name) {
 	self.dynamicFragSpecs.orientation.portrait = {};	
 	self.dynamicFragSpecs.orientation.landscape = {};
 	self.dynamicFragSpecs.orientation.selector = (Ti.Gesture.isPortrait()) ? 'portrait' : 'landscape';
-	
+
 	self.fragments = {};
 	
-	// dynamic updating
-	Ti.Gesture.addEventListener('orientationchange', function(e) {
-		var selector = (Ti.Gesture.isPortrait()) ? 'portrait' : 'landscape';
-		self.dynamicFragSpecs.orientation.selector = selector;
-		Ti.API.debug(selector);
-		
+	function orientationRedraw(selector) {
 		// reconfigure TiGrid so that grid is computed based on the new orientation
 		
 		Ti.API.debug('reconfiguring grid...');
-		grid.reconfigure({
-			height: args.height || Ti.Platform.displayCaps.platformHeight,
-			width: args.width || Ti.Platform.displayCaps.platformWidth
-		});
 		
-		Ti.API.debug('grid: ' + JSON.stringify(grid));
-			
+		var widgetSize = getWidgetSize();
+		Ti.API.debug('selector: ' + selector);
+		Ti.API.debug('SIZE: ' + JSON.stringify(widgetSize));
+		grid.reconfigure({
+			height: widgetSize.height,
+			width: widgetSize.width
+		});			
 		
 		// cycle over the dynamic fragment specs for the new orientation and set dirty
 		// so they are redrawn based on the new specs
 		for (var key in self.dynamicFragSpecs.orientation[selector]) {
-			Ti.API.debug('setting dirty: ' + key);
 			self.dynamicFragSpecs.orientation[selector][key].dirty = true;
 		}
 		
@@ -149,6 +148,30 @@ function Layout(name) {
 		}
 
 		self.compose();
+	}
+	
+	function postlayout() {
+		$.widget.parent.removeEventListener('postlayout', postlayout);
+		
+		Ti.API.debug('postlayout');
+		
+		var selector = Ti.Gesture.isPortrait() ? 'portrait' : 'landscape';
+		orientationRedraw(selector);
+	}
+
+	// dynamic updating
+	Ti.Gesture.addEventListener('orientationchange', function(e) {
+		var selector = Ti.Gesture.isPortrait() ? 'portrait' : 'landscape';
+		self.dynamicFragSpecs.orientation.selector = selector;
+		Ti.API.debug('orientation: ' + selector);
+
+		if (OS_ANDROID) {
+			$.widget.parent.addEventListener('postlayout', postlayout);
+		}
+		
+		if (OS_IOS) {
+			orientationRedraw(selector);
+		}
 	});
 }
 
@@ -284,9 +307,7 @@ Layout.prototype.compose = function() {
 			}
 		}
 		
-		if (dirty == true) {
-			Ti.API.debug(fragSpec);
-			
+		if (dirty == true) {			
 			var frag;
 			
 			fragSpec.dirty = false;
