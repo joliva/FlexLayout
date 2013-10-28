@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ti:app xmlns:ti="http://ti.appcelerator.org">
+	<ticaster_user>bc0dd7b8c6614f2eacc14a81d961e05d</ticaster_user>
+	<ticaster_app>d45815bd0c6144418e20ad97f67e6067</ticaster_app>
     <id>com.olivalabs.flexlayout</id>
     <name>FlexLayoutWidget</name>
     <version>1.0</version>
