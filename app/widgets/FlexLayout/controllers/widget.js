@@ -128,8 +128,6 @@ function Layout(name) {
 		Ti.API.debug('reconfiguring grid...');
 		
 		var widgetSize = getWidgetSize();
-		Ti.API.debug('selector: ' + selector);
-		Ti.API.debug('SIZE: ' + JSON.stringify(widgetSize));
 		grid.reconfigure({
 			height: widgetSize.height,
 			width: widgetSize.width
